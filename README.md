@@ -21,24 +21,50 @@ A local desktop toolkit for SEO auditing, website-to-Markdown conversion, and si
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### Option 1 — Download the prebuilt binary (no Python required)
+
+Go to the [**Releases**](../../releases/latest) page and download the files for your platform:
+
+#### 🪟 Windows
+
+Download `WebSEOToolkit-windows.exe` and double-click it. That's it.
+
+#### 🐧 Linux
+
+Download both `WebSEOToolkit-linux.zip`, then run:
+
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+The installer will:
+- Copy the binary to `~/.local/bin/`
+- Create a `.desktop` entry so the app appears in your application menu
+- Check for the `python3-tk` dependency and install it if missing
+
+After that, launch **Web SEO Toolkit** directly from your application menu like any other app.
+
+---
+
+### Option 2 — Run from source (Python required)
+
+#### Prerequisites
 
 - Python **3.11+**
 - A graphical environment (required for the Tkinter GUI)
 
 > **Note for Linux Users (Ubuntu/Mint/Debian):** Modern Linux distributions implement PEP 668, which restricts system-wide `pip` installations. Use your native package manager or a virtual environment (see options below).
 
----
+#### Installation
 
-### Installation
-
-#### Option A — Quick Install (System-wide via APT, Linux only)
+**Option A — Quick Install (System-wide via APT, Linux only)**
 
 ```bash
 sudo apt update && sudo apt install python3-pandas python3-bs4 python3-requests python3-tk -y
 ```
 
-#### Option B — Clean Install (Virtual Environment, all platforms)
+**Option B — Clean Install (Virtual Environment, all platforms)**
 
 1. Clone this repository or download the source files.
 2. Create and activate a virtual environment:
@@ -57,15 +83,28 @@ pip install -r requirements.txt
 
 > **⚠️ Windows-only packages:** `requirements.txt` includes `winrt-*`, `sounddevice`, and `vosk` which are Windows-specific or optional. On Linux/macOS, ignore pip errors for these packages — the core toolkit does not depend on them.
 
----
-
-### Running the Toolkit
+#### Running the Toolkit
 
 ```bash
 python3 main.py
+# or
+./scripts/launch.sh      # Linux / macOS
+scripts\launch.bat       # Windows
 ```
 
-This launches the graphical configuration interface where you can enter a target URL, choose an output folder, and select an action.
+---
+
+### Option 3 — Build the binary yourself
+
+1. Clone this repository.
+2. Run the build script (creates a venv automatically):
+
+```bash
+chmod +x scripts/build.sh
+./scripts/build.sh
+```
+
+The standalone executable will be generated in the `dist/` folder.
 
 ---
 
@@ -79,7 +118,12 @@ This launches the graphical configuration interface where you can enter a target
 ├── page_scraper.py      # HTML-to-Markdown converter
 ├── sitemap_manager.py   # Sitemap XML generator and robots.txt fetcher
 ├── data_manager.py      # CSV export and log management
-└── requirements.txt     # Python dependencies
+├── requirements.txt     # Python dependencies
+└── scripts/
+    ├── build.sh         # Build script (Linux / macOS)
+    ├── launch.sh        # Launch from source (Linux / macOS)
+    ├── launch.bat       # Launch from source (Windows)
+    └── install.sh       # Installer for prebuilt binary (Linux)
 ```
 
 Output files are saved under the `data/` directory by default (configurable via the GUI):

@@ -5,22 +5,22 @@ import requests
 from bs4 import BeautifulSoup
 # endregion : IMPORTS
 
-# region : EXTRATEUR PAGE PAR PAGE
+# region : SINGLE PAGE EXTRACTOR
 def scrape_page(url: str, output_folder: str = "markdown") -> str:
     headers = {"User-Agent": "Mozilla/5.0 (Compatible; MySEOBot/1.0)"}
     response = requests.get(url, headers=headers, timeout=10)
     response.raise_for_status()
 
     if "text/html" not in response.headers.get("Content-Type", ""):
-        raise ValueError(f"Le contenu récupéré n'est pas du HTML")
+        raise ValueError("Retrieved content is not HTML")
 
     soup = BeautifulSoup(response.content, "html.parser", from_encoding="utf-8")
 
-    # Nettoyage RAG (Retrait des menus, scripts, styles et bas de page)
+    # RAG cleanup — remove nav, scripts, styles, footers
     for tag in soup(["script", "style", "nav", "footer", "header", "meta", "link"]):
         tag.decompose()
 
-    title = soup.title.string.strip() if soup.title else "Page sans titre"
+    title = soup.title.string.strip() if soup.title else "Untitled page"
 
     content = []
     for tag in soup.find_all(["h1", "h2", "h3", "h4", "p", "li", "code", "pre"]):
@@ -54,7 +54,6 @@ def scrape_page(url: str, output_folder: str = "markdown") -> str:
 
     markdown = f"# {title}\n\nSource: {url}\n\n" + "\n\n".join(content)
 
-    # Création du nom sécurisé de fichier
     parsed = urlparse(url)
     path = parsed.netloc + parsed.path
     filename = path.replace("/", "_").strip("_") + ".md"
@@ -66,27 +65,27 @@ def scrape_page(url: str, output_folder: str = "markdown") -> str:
         f.write(markdown)
 
     return filepath
-# endregion : EXTRATEUR PAGE PAR PAGE
+# endregion : SINGLE PAGE EXTRACTOR
 
-# region : TRAITEMENT DE MASSE
+# region : BULK PROCESSING
 def scrape_multiple_urls(urls, output_folder, status_callback=None, progress_callback=None):
     success = 0
     errors = 0
     total = len(urls)
-    
+
     for index, url in enumerate(urls, start=1):
         try:
             scrape_page(url, output_folder=output_folder)
             success += 1
             if status_callback:
-                status_callback(f"✅ [{index}/{total}] Converti : {url}")
+                status_callback(f"✅ [{index}/{total}] Converted: {url}")
         except Exception as e:
             errors += 1
             if status_callback:
-                status_callback(f"❌ [{index}/{total}] Échec sur {url} ({str(e)})")
-                
+                status_callback(f"❌ [{index}/{total}] Failed on {url} ({str(e)})")
+
         if progress_callback:
             progress_callback(index, total)
-            
+
     return success, errors
-# endregion : TRAITEMENT DE MASSE
+# endregion : BULK PROCESSING

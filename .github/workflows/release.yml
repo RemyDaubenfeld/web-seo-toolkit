@@ -19,45 +19,61 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout du code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Installation de Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Installation des dépendances Linux
+      - name: Install Linux dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update -q
-          sudo apt-get install -q -y python3-tk
+          sudo apt-get install -q -y python3-tk zip
 
-      - name: Installation des dépendances Python
+      - name: Install Python dependencies
         run: |
-          pip install pyinstaller -r requirements-build.txt
-          
-      - name: Build avec PyInstaller
+          pip install pyinstaller beautifulsoup4 requests pandas lxml
+
+      - name: Build with PyInstaller
         run: |
           pyinstaller --onefile --windowed --name ${{ matrix.output_name }} main.py
 
-      - name: Upload de l'artefact
+      - name: Package Linux release (zip with install.sh)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p package
+          cp dist/WebSEOToolkit-linux package/
+          cp scripts/install.sh package/
+          cd package && zip ../WebSEOToolkit-linux.zip *
+
+      - name: Upload Linux artifact
+        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.output_name }}
-          path: dist/${{ matrix.output_name }}
+          name: WebSEOToolkit-linux
+          path: WebSEOToolkit-linux.zip
+
+      - name: Upload Windows artifact
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: WebSEOToolkit-windows
+          path: dist/WebSEOToolkit-windows.exe
 
   release:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Téléchargement des artefacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist/
 
-      - name: Création de la release GitHub
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/**/*

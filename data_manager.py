@@ -4,18 +4,18 @@ from datetime import datetime
 import pandas as pd
 # endregion : IMPORTS
 
-# region : CONFIGURATION DOSSIERS PAR DEFAUT
+# region : DEFAULT FOLDER CONFIGURATION
 LOG_OUTPUT_FOLDER = "data/logs"
 CSV_OUTPUT_FOLDER = "data/csv"
-# endregion : CONFIGURATION DOSSIERS PAR DEFAUT
+# endregion : DEFAULT FOLDER CONFIGURATION
 
-# region : SYSTEME DE VERIFICATION
+# region : FOLDER VERIFICATION
 def ensure_folder_exists(folder_path):
     if not os.path.exists(folder_path):
         os.makedirs(folder_path, exist_ok=True)
-# endregion : SYSTEME DE VERIFICATION
+# endregion : FOLDER VERIFICATION
 
-# region : ENREGISTREMENT DES LOGS
+# region : LOG RECORDING
 def log_message(message):
     ensure_folder_exists(LOG_OUTPUT_FOLDER)
     date_str = datetime.now().strftime("%d-%m-%Y")
@@ -26,20 +26,20 @@ def log_message(message):
 
     with open(log_path, "a", encoding="utf-8") as f:
         f.write(formatted + "\n")
-# endregion : ENREGISTREMENT DES LOGS
+# endregion : LOG RECORDING
 
-# region: EXPORT DES RESULTATS AUDIT
+# region: AUDIT RESULTS EXPORT
 def export_results(results_list, custom_folder=None):
-    if not results_list: 
+    if not results_list:
         return None
-    
+
     target_dir = custom_folder if custom_folder else CSV_OUTPUT_FOLDER
     ensure_folder_exists(target_dir)
-    
+
     date_str = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
-    filename = f"audit_seo_{date_str}.csv"
+    filename = f"seo_audit_{date_str}.csv"
     file_path = os.path.join(target_dir, filename)
-    
+
     df = pd.DataFrame(results_list)
 
     if 'errors' in df.columns:
@@ -47,4 +47,4 @@ def export_results(results_list, custom_folder=None):
 
     df.to_csv(file_path, index=False, encoding="utf-8-sig", sep=";")
     return file_path
-# endregion: EXPORT DES RESULTATS AUDIT
+# endregion: AUDIT RESULTS EXPORT
