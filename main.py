@@ -95,7 +95,14 @@ def finish_session(message, is_error=False):
 # endregion : INTERFACE DE SUIVI (CONSOLE)
 
 # region : VERIFICATIONS SYSTEME
+def is_frozen():
+    """Retourne True si on tourne dans un binaire PyInstaller."""
+    return getattr(sys, 'frozen', False)
+
 def check_scripts():
+    if is_frozen():
+        return
+    
     SCRIPTS = ["seo_scanner.py", "data_manager.py", "seo_crawler.py", "page_scraper.py", "sitemap_manager.py"]
     FILES = ["requirements.txt"]
     missing_files = [f for f in SCRIPTS + FILES if not os.path.exists(f)]
@@ -105,6 +112,9 @@ def check_scripts():
         sys.exit()
 
 def check_deps():
+    if is_frozen():
+        return
+
     try:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "-r", "requirements.txt"])
     except Exception as e:

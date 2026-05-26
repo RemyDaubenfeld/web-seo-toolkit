@@ -35,8 +35,8 @@ jobs:
 
       - name: Installation des dépendances Python
         run: |
-          pip install pyinstaller requests beautifulsoup4 pandas
-
+          pip install pyinstaller -r requirements-build.txt
+          
       - name: Build avec PyInstaller
         run: |
           pyinstaller --onefile --windowed --name ${{ matrix.output_name }} main.py

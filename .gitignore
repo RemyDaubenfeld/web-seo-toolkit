@@ -3,8 +3,12 @@ __pycache__/
 *.pyc
 *.pyo
 venv/
+.venv/
+.venv-build/
 dist/
 build/
 *.spec
 
 data/
+
+cmd.txt
