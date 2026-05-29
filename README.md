@@ -15,6 +15,7 @@ A local desktop toolkit for SEO auditing, website-to-Markdown conversion, and si
 
 - **📊 SEO Audit** — Analyze any URL for common SEO issues: missing title, meta description, H1 structure, images without `alt`, `robots.txt`, and `sitemap.xml` presence. Results are exported as a `.csv` report.
 - **📝 Convert to Markdown** — Crawl an entire website and convert each HTML page into a clean Markdown file, stripped of scripts, styles, navbars, and footers. Ideal for RAG pipelines or documentation archiving.
+- **🔍 Scrape Single Page** — Convert a single page to Markdown without crawling the entire site.
 - **🌐 Generate Sitemap & Robots.txt** — Recursively crawl a site to discover all internal URLs, generate a valid `sitemap.xml`, and save a local copy of the site's `robots.txt`.
 
 ---
@@ -31,7 +32,7 @@ Download `WebSEOToolkit-windows.exe` and double-click it. That's it.
 
 #### 🐧 Linux
 
-Download both `WebSEOToolkit-linux.zip`, then run:
+Download `WebSEOToolkit-linux.zip`, then run:
 
 ```bash
 chmod +x install.sh
@@ -43,7 +44,11 @@ The installer will:
 - Create a `.desktop` entry so the app appears in your application menu
 - Check for the `python3-tk` dependency and install it if missing
 
-After that, launch **Web SEO Toolkit** directly from your application menu like any other app.
+After that, launch **Web SEO Toolkit** directly from your application menu, or from the terminal:
+
+```bash
+WebSEOToolkit
+```
 
 ---
 
@@ -88,8 +93,8 @@ pip install -r requirements.txt
 ```bash
 python3 main.py
 # or
-./scripts/launch.sh      # Linux / macOS
-scripts\launch.bat       # Windows
+./launch.sh      # Linux / macOS
+launch.bat       # Windows
 ```
 
 ---
@@ -97,11 +102,11 @@ scripts\launch.bat       # Windows
 ### Option 3 — Build the binary yourself
 
 1. Clone this repository.
-2. Run the build script (creates a venv automatically):
+2. Run the build script:
 
 ```bash
-chmod +x scripts/build.sh
-./scripts/build.sh
+chmod +x build.sh
+./build.sh
 ```
 
 The standalone executable will be generated in the `dist/` folder.
@@ -119,11 +124,9 @@ The standalone executable will be generated in the `dist/` folder.
 ├── sitemap_manager.py   # Sitemap XML generator and robots.txt fetcher
 ├── data_manager.py      # CSV export and log management
 ├── requirements.txt     # Python dependencies
-└── scripts/
-    ├── build.sh         # Build script (Linux / macOS)
-    ├── launch.sh        # Launch from source (Linux / macOS)
-    ├── launch.bat       # Launch from source (Windows)
-    └── install.sh       # Installer for prebuilt binary (Linux)
+├── launch.sh            # Launch from source (Linux / macOS)
+├── launch.bat           # Launch from source (Windows)
+└── build.sh             # Build script (Linux / macOS)
 ```
 
 Output files are saved under the `data/` directory by default (configurable via the GUI):

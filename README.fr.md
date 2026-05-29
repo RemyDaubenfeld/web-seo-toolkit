@@ -15,6 +15,7 @@ Une boîte à outils desktop locale pour l'audit SEO, la conversion de sites web
 
 - **📊 Audit SEO** — Analyse une URL pour détecter les problèmes SEO courants : title manquant, meta description, structure des H1, images sans `alt`, présence du `robots.txt` et du `sitemap.xml`. Les résultats sont exportés dans un rapport `.csv`.
 - **📝 Conversion en Markdown** — Crawle un site entier et convertit chaque page HTML en fichier Markdown propre, débarrassé des scripts, styles, menus et pieds de page. Idéal pour les pipelines RAG ou l'archivage de documentation.
+- **🔍 Scraper une page unique** — Convertit une seule page en Markdown sans crawler tout le site.
 - **🌐 Génération Sitemap & Robots.txt** — Explore récursivement un site pour découvrir toutes les URLs internes, génère un `sitemap.xml` valide et sauvegarde une copie locale du `robots.txt`.
 
 ---
@@ -23,7 +24,7 @@ Une boîte à outils desktop locale pour l'audit SEO, la conversion de sites web
 
 ### Option 1 — Télécharger le binaire précompilé (sans Python)
 
-Rendez-vous sur la page des [**Releases**](../../releases/latest) et téléchargez les fichiers correspondant à votre système :
+Rendez-vous sur la page des [**Releases**](../../releases/latest) et téléchargez le fichier correspondant à votre système :
 
 #### 🪟 Windows
 
@@ -43,7 +44,11 @@ Le script d'installation va :
 - Créer une entrée `.desktop` pour que l'application apparaisse dans votre menu
 - Vérifier la dépendance `python3-tk` et l'installer si nécessaire
 
-Ensuite, lancez **Web SEO Toolkit** directement depuis votre menu d'applications comme n'importe quelle autre appli.
+Ensuite, lancez **Web SEO Toolkit** depuis votre menu d'applications, ou depuis le terminal :
+
+```bash
+WebSEOToolkit
+```
 
 ---
 
@@ -88,8 +93,8 @@ pip install -r requirements.txt
 ```bash
 python3 main.py
 # ou
-./scripts/launch.sh      # Linux / macOS
-scripts\launch.bat       # Windows
+./launch.sh      # Linux / macOS
+launch.bat       # Windows
 ```
 
 ---
@@ -97,11 +102,11 @@ scripts\launch.bat       # Windows
 ### Option 3 — Compiler le binaire soi-même
 
 1. Clonez ce dépôt.
-2. Lancez le script de build (crée un venv automatiquement) :
+2. Lancez le script de build :
 
 ```bash
-chmod +x scripts/build.sh
-./scripts/build.sh
+chmod +x build.sh
+./build.sh
 ```
 
 L'exécutable standalone sera généré dans le dossier `dist/`.
@@ -119,11 +124,9 @@ L'exécutable standalone sera généré dans le dossier `dist/`.
 ├── sitemap_manager.py   # Générateur de sitemap XML et récupération du robots.txt
 ├── data_manager.py      # Export CSV et gestion des logs
 ├── requirements.txt     # Dépendances Python
-└── scripts/
-    ├── build.sh         # Script de build (Linux / macOS)
-    ├── launch.sh        # Lancement depuis les sources (Linux / macOS)
-    ├── launch.bat       # Lancement depuis les sources (Windows)
-    └── install.sh       # Installateur du binaire précompilé (Linux)
+├── launch.sh            # Lancement depuis les sources (Linux / macOS)
+├── launch.bat           # Lancement depuis les sources (Windows)
+└── build.sh             # Script de build (Linux / macOS)
 ```
 
 Les fichiers de sortie sont sauvegardés dans le dossier `data/` par défaut (configurable via l'interface) :

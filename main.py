@@ -167,6 +167,43 @@ def run_seo_audit():
     counter_label.config(text="Analysis complete", fg="green")
     finish_session("Report saved successfully.", is_error=False)
 
+def run_sitemap_generator():
+    url = url_entry.get().strip()
+    if not url or url == "https://":
+        messagebox.showwarning("Warning", "Please enter a valid URL.")
+        return
+
+    output_dir = target_folder if target_folder else "data/sitemaps"
+
+    create_status_window("Sitemap & Robots.txt Generation")
+    update_status(f"🚀 Starting site structure crawl for: {url}\n")
+
+    from seo_crawler import SEOCrawler
+    import sitemap_manager
+
+    update_status("🤖 Fetching robots.txt...")
+    robots_data = sitemap_manager.download_robots_txt(url)
+
+    update_status("\n🕸️ Scanning internal links...")
+    crawler = SEOCrawler(url)
+    urls = crawler.get_url_list(update_callback=lambda msg: update_status(msg))
+
+    domain_name = urlparse(url).netloc.replace('.', '_')
+    dossier_final = os.path.join(output_dir, domain_name)
+    os.makedirs(dossier_final, exist_ok=True)
+
+    sitemap_path = os.path.join(dossier_final, "sitemap.xml")
+    sitemap_manager.generate_xml_sitemap(urls, sitemap_path)
+    update_status(f"\n🗺️ Sitemap XML created: ", export_path=sitemap_path)
+
+    robots_path = os.path.join(dossier_final, "robots.txt")
+    with open(robots_path, "w", encoding="utf-8") as f:
+        f.write(robots_data)
+    update_status(f"🤖 Robots.txt copy saved: ", export_path=robots_path)
+
+    counter_label.config(text="Sitemap & Robots.txt created!", fg="green")
+    finish_session(f"Generation complete.\nFiles saved to: {dossier_final}", is_error=False)
+
 def run_markdown_extractor():
     url = url_entry.get().strip()
     if not url or url == "https://":
@@ -214,42 +251,31 @@ def run_markdown_extractor():
     counter_label.config(text="Conversion complete!", fg="green")
     finish_session(f"Extraction complete. Success: {success} | Failures: {errors}\nFiles saved to: {final_output_path}", is_error=False)
 
-def run_sitemap_generator():
+def run_single_page_scraper():
     url = url_entry.get().strip()
     if not url or url == "https://":
         messagebox.showwarning("Warning", "Please enter a valid URL.")
         return
 
-    output_dir = target_folder if target_folder else "data/sitemaps"
+    output_dir = target_folder if target_folder else "data/markdown"
 
-    create_status_window("Sitemap & Robots.txt Generation")
-    update_status(f"🚀 Starting site structure crawl for: {url}\n")
-
-    from seo_crawler import SEOCrawler
-    import sitemap_manager
-
-    update_status("🤖 Fetching robots.txt...")
-    robots_data = sitemap_manager.download_robots_txt(url)
-
-    update_status("\n🕸️ Scanning internal links...")
-    crawler = SEOCrawler(url)
-    urls = crawler.get_url_list(update_callback=lambda msg: update_status(msg))
-
-    domain_name = urlparse(url).netloc.replace('.', '_')
-    dossier_final = os.path.join(output_dir, domain_name)
-    os.makedirs(dossier_final, exist_ok=True)
-
-    sitemap_path = os.path.join(dossier_final, "sitemap.xml")
-    sitemap_manager.generate_xml_sitemap(urls, sitemap_path)
-    update_status(f"\n🗺️ Sitemap XML created: ", export_path=sitemap_path)
-
-    robots_path = os.path.join(dossier_final, "robots.txt")
-    with open(robots_path, "w", encoding="utf-8") as f:
-        f.write(robots_data)
-    update_status(f"🤖 Robots.txt copy saved: ", export_path=robots_path)
-
-    counter_label.config(text="Sitemap & Robots.txt created!", fg="green")
-    finish_session(f"Generation complete.\nFiles saved to: {dossier_final}", is_error=False)
+    create_status_window("Converting page to Markdown")
+    update_status(f"🔍 Converting page : {url}\n")
+ 
+    import page_scraper
+ 
+    progress_bar["maximum"] = 1
+    progress_bar["value"] = 0
+    counter_label.config(text="Conversion in progress...", fg="blue")
+ 
+    try:
+        filepath = page_scraper.scrape_page(url, output_folder=output_dir)
+        progress_bar["value"] = 1
+        update_status(f"\n📄 Markdown file created : ", export_path=filepath)
+        counter_label.config(text="Conversion complete !", fg="green")
+        finish_session(f"Page successfully converted.", is_error=False)
+    except Exception as e:
+        finish_session(f"Conversion failed : {str(e)}", is_error=True)
 # endregion : ACTION HANDLERS
 
 # region : MAIN MENU
@@ -263,6 +289,7 @@ def main_menu():
 
     Label(root, text="Scan Settings", font=("Helvetica", 14, "bold"), pady=10).pack()
 
+    # Frame URL
     frame_url = Frame(root, padx=15, pady=5)
     frame_url.pack(fill=X)
     Label(frame_url, text="Target URL:", font=("Helvetica", 10, "bold")).pack(anchor=W)
@@ -270,6 +297,7 @@ def main_menu():
     url_entry.insert(0, "https://")
     url_entry.pack(fill=X, pady=5)
 
+    # Frame folder
     frame_folder = Frame(root, padx=15, pady=5)
     frame_folder.pack(fill=X)
     Label(frame_folder, text="Output Folder (Optional):", font=("Helvetica", 10, "bold")).pack(anchor=W)
@@ -282,18 +310,38 @@ def main_menu():
 
     btn_browse = Button(frame_sub_folder, text="Browse...", command=browse_output_folder)
     btn_browse.pack(side=RIGHT)
-
+    
+    # Frame action button
     frame_actions = Frame(root, pady=15)
     frame_actions.pack()
 
-    btn_seo = Button(frame_actions, text="📊 Run SEO Audit", font=("Helvetica", 10, "bold"), bg="#4caf50", fg="white", width=25, command=run_seo_audit)
-    btn_seo.grid(row=0, column=0, padx=10, pady=5)
 
-    btn_md = Button(frame_actions, text="📝 Convert to Markdown", font=("Helvetica", 10, "bold"), bg="#2196f3", fg="white", width=25, command=run_markdown_extractor)
-    btn_md.grid(row=0, column=1, padx=10, pady=5)
-
-    btn_sitemap = Button(frame_actions, text="🌐 Generate Sitemap & Robots.txt", font=("Helvetica", 10, "bold"), bg="#9c27b0", fg="white", width=54, command=run_sitemap_generator)
-    btn_sitemap.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
+    # Colonne SEO
+    frame_seo = Frame(frame_actions, padx=10)
+    frame_seo.grid(row=0, column=0, sticky=N)
+ 
+    Label(frame_seo, text="🔎 SEO", font=("Helvetica", 10, "bold")).pack(pady=(0, 5))
+ 
+    btn_seo = Button(frame_seo, text="📊 Run SEO Audit", font=("Helvetica", 10, "bold"), bg="#4caf50", fg="white", width=25, command=run_seo_audit)
+    btn_seo.pack(pady=5)
+ 
+    btn_sitemap = Button(frame_seo, text="🌐 Generate Sitemap & Robots.txt", font=("Helvetica", 10, "bold"), bg="#9c27b0", fg="white", width=25, command=run_sitemap_generator)
+    btn_sitemap.pack(pady=5)
+ 
+    # Séparateur vertical
+    Frame(frame_actions, width=2, bg="#cccccc").grid(row=0, column=1, sticky=NS, padx=5, pady=5)
+ 
+    # Colonne Scraping
+    frame_scraping = Frame(frame_actions, padx=10)
+    frame_scraping.grid(row=0, column=2, sticky=N)
+ 
+    Label(frame_scraping, text="🕷️ Scraping (convert to Markdown)", font=("Helvetica", 10, "bold")).pack(pady=(0, 5))
+ 
+    btn_single = Button(frame_scraping, text="🔍 Scrape Single Page", font=("Helvetica", 10, "bold"), bg="#ff9800", fg="white", width=25, command=run_single_page_scraper)
+    btn_single.pack(pady=5)
+ 
+    btn_md = Button(frame_scraping, text="📝 Scrape All Site", font=("Helvetica", 10, "bold"), bg="#2196f3", fg="white", width=25, command=run_markdown_extractor)
+    btn_md.pack(pady=5)
 
     root.mainloop()
 # endregion : MAIN MENU
